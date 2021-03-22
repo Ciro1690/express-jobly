@@ -96,11 +96,51 @@ class User {
     return user;
   }
 
+/** Create job application for specified user and job.
+ *
+ * Returns { username, jobId }
+ *
+ **/
+
+  static async applyForJob(username, jobId) {
+    let result = await db.query(
+      `INSERT INTO applications
+      (username, 
+        job_id)
+      VALUES ($1, $2)
+      RETURNING username, job_id AS "jobId"`,
+      [username, jobId],
+    );
+    const application = result.rows[0];
+
+    return application;
+  }
+
+/** Search for job applications for specified user.
+ *
+ * Returns { jobId }
+ *
+ **/
+
+  static async findApps(username) {
+    let result = await db.query(
+      `SELECT job_id
+      FROM applications
+      WHERE username = $1`,
+      [username],
+    );
+    const applications = result.rows;
+
+    return applications;
+  }
+
+
+
   /** Find all users.
    *
    * Returns [{ username, first_name, last_name, email, is_admin }, ...]
    **/
-
+  
   static async findAll() {
     const result = await db.query(
           `SELECT username,
